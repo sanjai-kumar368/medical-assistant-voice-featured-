@@ -84,25 +84,7 @@ Prakash - Deployment and testing
 ---
 
 # Project Structure
-
-backend/
-│
-├── app.py
-├── requirements.txt
-├── .env
-│
-├── templates/
-│   ├── index.html
-│   ├── doctor.html
-│   ├── chatbot.html
-│   ├── doctor_form.html
-│   ├── doctor_login.html
-│   └── patient_form.html
-│
-├── static/
-│   ├── style.css
-│   ├── script.js
-│   └── supabase-config.js
+<img width="337" height="501" alt="image" src="https://github.com/user-attachments/assets/d936e665-16c5-4c92-84e3-c46933dced1b" />
 
 # Screen Shots
 
