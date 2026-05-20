@@ -9,10 +9,19 @@ from groq import Groq
 
 load_dotenv()
 
-app = Flask(__name__, template_folder='templates', static_folder='static')
+app = Flask(
+    __name__,
+    template_folder='templates',
+    static_folder='static'
+)
+
 CORS(app)
 
-app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///medical.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv(
+    'DATABASE_URL',
+    'sqlite:///medical.db'
+)
+
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
@@ -26,34 +35,85 @@ client = Groq(
 # ---------------- DATABASE MODELS ----------------
 
 class Doctor(db.Model):
+
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False)
-    specialization = db.Column(db.String(100), nullable=False)
-    available_time = db.Column(db.String(100), nullable=False)
+
+    name = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    specialization = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    available_time = db.Column(
+        db.String(100),
+        nullable=False
+    )
 
 
 class Appointment(db.Model):
-    id = db.Column(db.Integer, primary_key=True)
-    patient_name = db.Column(db.String(100), nullable=False)
-    doctor_name = db.Column(db.String(100), nullable=False)
-    appointment_time = db.Column(db.String(100), nullable=False)
 
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    patient_name = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    doctor_name = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+    appointment_time = db.Column(
+        db.String(100),
+        nullable=False
+    )
+
+# ---------------- DEFAULT DOCTORS ----------------
 
 def add_doctors():
+
     if Doctor.query.first():
         return
 
     doctors_list = [
-        Doctor(name="Dr. Rajesh", specialization="Cardiologist", available_time="10 AM - 2 PM"),
-        Doctor(name="Dr. Priya", specialization="Dermatologist", available_time="4 PM - 8 PM"),
-        Doctor(name="Dr. Arun", specialization="Neurologist", available_time="9 AM - 1 PM"),
-        Doctor(name="Dr. Meena", specialization="Pediatrician", available_time="5 PM - 9 PM"),
+
+        Doctor(
+            name="Dr. Rajesh",
+            specialization="Cardiologist",
+            available_time="10 AM - 2 PM"
+        ),
+
+        Doctor(
+            name="Dr. Priya",
+            specialization="Dermatologist",
+            available_time="4 PM - 8 PM"
+        ),
+
+        Doctor(
+            name="Dr. Arun",
+            specialization="Neurologist",
+            available_time="9 AM - 1 PM"
+        ),
+
+        Doctor(
+            name="Dr. Meena",
+            specialization="Pediatrician",
+            available_time="5 PM - 9 PM"
+        )
     ]
 
     db.session.add_all(doctors_list)
     db.session.commit()
 
-# ---------------- ROUTES ----------------
+# ---------------- PAGE ROUTES ----------------
 
 @app.route('/')
 def home():
@@ -67,8 +127,16 @@ def doctor_page():
 
 @app.route('/patient-form')
 def patient_form():
-    doctor_name = request.args.get('doctor_name', '')
-    return render_template('patient_form.html', doctor_name=doctor_name)
+
+    doctor_name = request.args.get(
+        'doctor_name',
+        ''
+    )
+
+    return render_template(
+        'patient_form.html',
+        doctor_name=doctor_name
+    )
 
 
 @app.route('/chatbot')
@@ -85,19 +153,22 @@ def doctor_form():
 def doctor_login():
     return render_template('doctor_login.html')
 
-# ---------------- DOCTORS ----------------
+# ---------------- DOCTORS API ----------------
 
 @app.route('/doctors', methods=['GET'])
 def doctors():
+
     all_doctors = Doctor.query.all()
 
     doctors_list = [
+
         {
             "id": doctor.id,
             "name": doctor.name,
             "specialization": doctor.specialization,
             "available_time": doctor.available_time
         }
+
         for doctor in all_doctors
     ]
 
@@ -111,16 +182,36 @@ def book_appointment():
     data = request.get_json(silent=True)
 
     if not data:
-        raise BadRequest("Request body must be valid JSON.")
+        raise BadRequest(
+            "Request body must be valid JSON."
+        )
 
-    patient_name = data.get('patient_name', '').strip()
-    doctor_name = data.get('doctor_name', '').strip()
-    appointment_time = data.get('appointment_time', '').strip()
+    patient_name = data.get(
+        'patient_name',
+        ''
+    ).strip()
 
-    if not patient_name or not doctor_name or not appointment_time:
+    doctor_name = data.get(
+        'doctor_name',
+        ''
+    ).strip()
+
+    appointment_time = data.get(
+        'appointment_time',
+        ''
+    ).strip()
+
+    if (
+        not patient_name or
+        not doctor_name or
+        not appointment_time
+    ):
 
         return jsonify({
-            "error": "patient_name, doctor_name, and appointment_time are required."
+            "error": (
+                "patient_name, doctor_name, "
+                "and appointment_time are required."
+            )
         }), 400
 
     appointment = Appointment(
@@ -144,11 +235,17 @@ def voice_command():
     data = request.get_json(silent=True)
 
     if not data:
-        raise BadRequest("Request body must be valid JSON.")
+        raise BadRequest(
+            "Request body must be valid JSON."
+        )
 
-    text = data.get('text', '').strip()
+    text = data.get(
+        'text',
+        ''
+    ).strip()
 
     if not text:
+
         return jsonify({
             "error": "text is required"
         }), 400
@@ -166,11 +263,17 @@ def ai_medical():
     data = request.get_json(silent=True)
 
     if not data:
-        raise BadRequest("Request body must be valid JSON.")
+        raise BadRequest(
+            "Request body must be valid JSON."
+        )
 
-    query = data.get('query', '').strip()
+    query = data.get(
+        'query',
+        ''
+    ).strip()
 
     if not query:
+
         return jsonify({
             "error": "query is required"
         }), 400
@@ -178,20 +281,30 @@ def ai_medical():
     try:
 
         completion = client.chat.completions.create(
-            model="model="llama-3.3-70b-versatile",",
+
+            model="llama-3.3-70b-versatile",
+
             messages=[
+
                 {
                     "role": "system",
+
                     "content": (
                         "You are a helpful AI medical assistant. "
-                        "Provide safe health guidance but avoid diagnosis."
+                        "Provide safe health guidance but avoid "
+                        "diagnosis. Keep responses simple and "
+                        "user-friendly."
                     )
                 },
+
                 {
                     "role": "user",
                     "content": query
                 }
-            ]
+            ],
+
+            temperature=0.7,
+            max_tokens=1024
         )
 
         ai_response = (
@@ -217,13 +330,15 @@ def ai_medical():
 
 @app.errorhandler(BadRequest)
 def handle_bad_request(e):
+
     return jsonify({
         "error": str(e.description)
     }), 400
 
-# ---------------- INIT DATABASE ----------------
+# ---------------- DATABASE INIT ----------------
 
 with app.app_context():
+
     db.create_all()
     add_doctors()
 
