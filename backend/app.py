@@ -1,3 +1,4 @@
+from flask import render_template
 from dotenv import load_dotenv
 import os
 from flask import Flask, jsonify, request
@@ -111,12 +112,7 @@ def detect_intent(text):
 # -------------------------------------------------
 @app.route('/')
 def home():
-
-    return jsonify({
-
-        "message": "Medical Voice AI Backend Running"
-
-    })
+    return render_template("index.html")
 
 # -------------------------------------------------
 # Route: View Doctors
