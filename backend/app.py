@@ -1,12 +1,17 @@
-from flask import render_template
 from dotenv import load_dotenv
 import os
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
+
 load_dotenv()
 
-app = Flask(__name__)
+app = Flask(
+    __name__,
+    template_folder='templates',
+    static_folder='static'
+)
+
 CORS(app)
 # -------------------------------------------------
 # Database Configuration
@@ -112,7 +117,30 @@ def detect_intent(text):
 # -------------------------------------------------
 @app.route('/')
 def home():
-    return render_template("index.html")
+    return render_template('index.html')
+
+#--------------------------------------------------
+#Other html files
+#--------------------------------------------------
+@app.route('/doctor')
+def doctor_page():
+    return render_template('doctor.html')
+
+@app.route('/chatbot')
+def chatbot_page():
+    return render_template('chatbot.html')
+
+@app.route('/doctor-form')
+def doctor_form():
+    return render_template('doctor_form.html')
+
+@app.route('/doctor-login')
+def doctor_login():
+    return render_template('doctor_login.html')
+
+@app.route('/patient-form')
+def patient_form():
+    return render_template('patient_form.html')
 
 # -------------------------------------------------
 # Route: View Doctors
