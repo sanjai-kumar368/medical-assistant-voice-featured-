@@ -11,7 +11,7 @@
     <script src="{{ url_for('static', filename='supabase-config.js') }}"></script>
 </head>
 <body>
-    <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+    <button class="back-btn" onclick="window.location.href='/'">← Back</button>
     <div class="app-container">
         <header class="app-header">
             <h1>👨‍⚕️ Add Doctor</h1>
@@ -50,7 +50,7 @@
             }
 
             if (!supabaseClient) {
-                alert("Supabase Client not initialized. Please set up your credentials in frontend/supabase-config.js.");
+                ("Salertupabase Client not initialized. Please set up your credentials in frontend/supabase-config.js.");
                 return;
             }
 

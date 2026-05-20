@@ -11,7 +11,7 @@
     <script src="{{ url_for('static', filename='supabase-config.js') }}"></script>
 </head>
 <body>
-    <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+    <button class="back-btn" onclick="window.location.href='/'">← Back</button>
     <div class="app-container">
         <header class="app-header">
             <h1>🔐 Doctor Login</h1>
@@ -33,7 +33,7 @@
             </form>
 
             <p style="text-align: center; margin-top: 20px; font-size: 0.95em;">
-                Don't have an account? <a href="doctor_form.html" style="color: #007bff; text-decoration: none; font-weight: bold;">Register Here</a>
+                Don't have an account? <a href="/doctor-form" style="color: #007bff; text-decoration: none; font-weight: bold;">Register Here</a>
             </p>
         </div>
     </div>
@@ -70,7 +70,7 @@
                 alert(`Welcome back, ${doctor.name} (${doctor.specialist})! Redirecting to dashboard...`);
                 // Store doctor profile locally to persist session
                 localStorage.setItem('loggedInDoctor', JSON.stringify(doctor));
-                window.location.href = 'index.html';
+                window.location.href = '/';
             } else {
                 alert(`Access Denied: No doctor profile found matching the name "${user}". Please check the spelling or register a new profile below.`);
             }
