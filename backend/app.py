@@ -294,6 +294,7 @@ def ai_medical():
                         "Provide safe health guidance but avoid "
                         "diagnosis. Keep responses simple and "
                         "user-friendly."
+                        "make each sentences into points and always start them in new line"
                     )
                 },
 
@@ -303,7 +304,7 @@ def ai_medical():
                 }
             ],
 
-            temperature=0.7,
+            temperature=0.3,
             max_tokens=1024
         )
 
