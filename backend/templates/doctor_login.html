@@ -3,78 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doctor Login - Medical Assistant</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Login</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- Supabase JS Client Library SDK (UMD Version) -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
-    <!-- Supabase Config -->
-    <script src="{{ url_for('static', filename='supabase-config.js') }}"></script>
 </head>
 <body>
     <button class="back-btn" onclick="window.location.href='/'">← Back</button>
+
     <div class="app-container">
         <header class="app-header">
             <h1>🔐 Doctor Login</h1>
-            <p class="subtitle">Enter your credentials to access the Doctor Portal</p>
+            <p class="subtitle">Sign in to access doctor features</p>
         </header>
 
-        <!-- Doctor Login Form -->
-        <div class="card" style="max-width: 400px; margin: 0 auto; text-align: left;">
-            <form id="login-form">
+        <div class="card" style="max-width: 420px; margin: 0 auto; text-align: left;">
+            <form id="doctor-login-form">
                 <div style="margin-bottom: 15px;">
-                    <label>Doctor Name (Registered):</label>
-                    <input type="text" id="login-username" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;" placeholder="e.g. Alice Smith">
+                    <label>Email:</label>
+                    <input type="email" id="doctor-email"
+                        style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;"
+                        placeholder="doctor@example.com">
                 </div>
+
                 <div style="margin-bottom: 15px;">
                     <label>Password:</label>
-                    <input type="password" id="login-password" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;" placeholder="••••••••">
+                    <input type="password" id="doctor-password"
+                        style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;"
+                        placeholder="••••••••">
                 </div>
-                <button type="button" class="primary-btn" onclick="handleLogin()">Login</button>
-            </form>
 
-            <p style="text-align: center; margin-top: 20px; font-size: 0.95em;">
-                Don't have an account? <a href="/doctor-form" style="color: #007bff; text-decoration: none; font-weight: bold;">Register Here</a>
-            </p>
+                <button type="submit" class="primary-btn">Login</button>
+            </form>
         </div>
     </div>
 
     <script>
-        async function handleLogin() {
-            const user = document.getElementById('login-username').value.trim();
-            const pass = document.getElementById('login-password').value;
-
-            if (!user || !pass) {
-                alert("Please fill all fields.");
-                return;
-            }
-
-            if (!supabaseClient) {
-                alert("Supabase Client is not configured. Please double check credentials in supabase-config.js.");
-                return;
-            }
-
-            // Supabase Query: Verify if a doctor with this name exists
-            const { data, error } = await supabaseClient
-                .from('doctors')
-                .select('*')
-                .ilike('name', `%${user}%`);
-
-            if (error) {
-                alert("Login failed: " + error.message);
-                console.error("Supabase select error:", error);
-                return;
-            }
-
-            if (data && data.length > 0) {
-                const doctor = data[0];
-                alert(`Welcome back, ${doctor.name} (${doctor.specialist})! Redirecting to dashboard...`);
-                // Store doctor profile locally to persist session
-                localStorage.setItem('loggedInDoctor', JSON.stringify(doctor));
-                window.location.href = '/';
-            } else {
-                alert(`Access Denied: No doctor profile found matching the name "${user}". Please check the spelling or register a new profile below.`);
-            }
-        }
+        document.getElementById('doctor-login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Login form submitted. Add authentication logic here.');
+        });
     </script>
 </body>
 </html>

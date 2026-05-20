@@ -1,283 +1,64 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Prescription Assistant</title>
+    <title>AI Medical Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <style>
-        /* Sleek Gear Icon & Modal Styling */
-        .settings-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: rgba(255, 255, 255, 0.2);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            font-size: 1.2rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-            color: white;
-            z-index: 10;
-        }
-
-        .settings-btn:hover {
-            transform: rotate(45deg);
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(5px);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 30px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 450px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-            text-align: left;
-        }
-
-        .close-modal {
-            float: right;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #888;
-        }
-
-        .close-modal:hover {
-            color: #333;
-        }
-    </style>
 </head>
-
 <body>
-    <button class="settings-btn" onclick="openModal()" title="AI Config Settings">⚙️</button>
-    
+    <button class="back-btn" onclick="window.location.href='/'">← Back</button>
+
     <div class="app-container">
         <header class="app-header">
-            <button class="back-btn" onclick="window.location.href='/'">← Back</button>
-            <h1>💊 Get Prescription</h1>
-            <p class="subtitle">Chat with our AI to request or renew your medication</p>
+            <h1>🤖 AI Medical Assistant</h1>
+            <p class="subtitle">Ask health-related questions and get instant responses</p>
         </header>
 
-        <div class="chat-container">
-            <div class="chat-box" id="chat-box">
-                <div class="message ai-message">
-                    Hello! I'm your AI Medical Assistant. What symptoms or medications do you need guidance on today?
-                </div>
-            </div>
-            <div class="chat-input-area">
-                <input type="text" id="chat-input" placeholder="Type your message here..." class="chat-input">
-                <button class="primary-btn send-btn" onclick="sendMessage()">Send</button>
-            </div>
-        </div>
+        <div class="card" style="max-width: 600px; margin: 0 auto; text-align: left;">
+            <label for="ai-query"><strong>Enter your question:</strong></label>
+            <textarea id="ai-query" rows="5"
+                style="width: 100%; padding: 10px; margin-top: 10px; border: 1px solid #ccc; border-radius: 4px;"
+                placeholder="Example: I have a headache and fever, what should I do?"></textarea>
 
-        <!-- Voice Control Section at the Page End -->
-        <div class="voice-controls">
-            <button id="voice-btn" class="voice-btn">🎤 Enable Voice Control</button>
-            <p id="voice-status" class="voice-status">Speak your symptoms or requests...</p>
-        </div>
-    </div>
+            <button class="primary-btn" style="margin-top: 15px;" onclick="askMedicalAI()">Ask AI</button>
 
-    <!-- Sleek Settings Modal -->
-    <div id="settings-modal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
-            <h2 style="margin-top: 0; color: #333;">🤖 AI Serverless Config</h2>
-            <p style="font-size: 0.9em; color: #666; margin-bottom: 20px;">
-                If your local Python server is offline, you can paste your <strong>Groq API Key</strong> here to run the chatbot 100% serverless directly in your browser!
-            </p>
-            <div style="margin-bottom: 20px;">
-                <label style="font-weight: bold; font-size: 0.95em;">Groq API Key:</label>
-                <input type="password" id="groq-key-input" style="width: 100%; padding: 10px; margin-top: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box;" placeholder="gsk_...">
-            </div>
-            <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                <button class="primary-btn" onclick="saveConfig()" style="padding: 10px 20px; font-size: 0.95em;">Save Settings</button>
+            <div id="ai-response"
+                style="margin-top: 20px; padding: 15px; border-radius: 8px; background: #f7f7f7; min-height: 60px;">
+                Response will appear here.
             </div>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='script.js') }}?v=1.4"></script>
     <script>
-        // Load saved key on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            const savedKey = localStorage.getItem('groq_api_key');
-            if (savedKey) {
-                document.getElementById('groq-key-input').value = savedKey;
+        async function askMedicalAI() {
+            const query = document.getElementById('ai-query').value.trim();
+            const responseBox = document.getElementById('ai-response');
+
+            if (!query) {
+                alert('Please enter a question.');
+                return;
             }
-        });
 
-        function openModal() {
-            document.getElementById('settings-modal').style.display = 'flex';
-        }
-
-        function closeModal() {
-            document.getElementById('settings-modal').style.display = 'none';
-        }
-
-        function saveConfig() {
-            const key = document.getElementById('groq-key-input').value.trim();
-            localStorage.setItem('groq_api_key', key);
-            alert("Settings saved successfully! Chatbot will now run in serverless mode if your local backend is offline.");
-            closeModal();
-        }
-
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const chatBox = document.getElementById('chat-box');
-            if (input.value.trim() === '') return;
-
-            // User message
-            const userMsg = document.createElement('div');
-            userMsg.className = 'message user-message';
-            userMsg.innerText = input.value;
-            chatBox.appendChild(userMsg);
-
-            const userText = input.value;
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            // Add thinking indicator
-            const aiMsg = document.createElement('div');
-            aiMsg.className = 'message ai-message loading-msg';
-            aiMsg.innerText = 'AI is thinking...';
-            chatBox.appendChild(aiMsg);
-            chatBox.scrollTop = chatBox.scrollHeight;
-
-            // Step 1: Try local Python Flask backend
-            fetch('http://127.0.0.1:5000/ai-medical', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ query: userText })
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error("Flask server error");
-                    return res.json();
-                })
-                .then(data => {
-                    renderAIResponse(aiMsg, data.response);
-                })
-                .catch(err => {
-                    console.warn("Local Flask backend is offline, attempting serverless fallback...");
-
-                    // Step 2: Fall back to direct Groq API fetch if local backend is offline
-                    const apiKey = localStorage.getItem('groq_api_key');
-                    if (apiKey) {
-                        callGroqDirectly(aiMsg, userText, apiKey);
-                    } else {
-                        aiMsg.classList.remove('loading-msg');
-                        aiMsg.innerHTML = `
-                        <div style="color: #d9534f; font-weight: bold; margin-bottom: 10px;">❌ AI Connection Failed</div>
-                        Your local Python Flask backend is currently offline.<br><br>
-                        <strong>How to solve this:</strong><br>
-                        1. Open your terminal, stop the current command (Ctrl+C), and run <code>python run.py</code> again to boot the backend.<br>
-                        2. <strong>OR (Serverless Option):</strong> Click the ⚙️ gear icon at the top-right of your screen and paste your <strong>Groq API Key</strong> to chat serverless directly in your browser!
-                    `;
-                        chatBox.scrollTop = chatBox.scrollHeight;
-                    }
+            try {
+                const res = await fetch('/ai-medical', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query })
                 });
-        }
 
-        // Direct fetch query to Groq Cloud API (fully serverless)
-        function callGroqDirectly(aiElement, query, apiKey) {
-            const prompt = `
-            You are an AI healthcare assistant.
-            start a sentence in new line for each point.
+                const data = await res.json();
 
-            Your job is to provide:
-            - basic wellness guidance
-            - simple home remedies
-            - healthy precautions
+                if (!res.ok) {
+                    responseBox.innerHTML = `<span style="color:red;">${data.error || 'Something went wrong.'}</span>`;
+                    return;
+                }
 
-            Rules:
-            - Never diagnose diseases
-            - Never prescribe medicines
-            - Never create panic
-            - Always recommend consulting a doctor for severe symptoms
-
-            Response Format:
-
-            Possible Cause:
-            <short explanation>
-
-            Home Remedies:
-            - remedy 1
-            - remedy 2
-            - remedy 3
-
-            Precautions:
-            - precaution 1
-            - precaution 2
-
-            Doctor Advice:
-            <when to consult a doctor>
-
-            User Query:
-            ${query}
-            `;
-
-            fetch('https://api.groq.com/openai/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${apiKey}`,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: 'llama-3.3-70b-versatile',
-                    messages: [
-                        { role: 'user', content: prompt }
-                    ],
-                    temperature: 0.5
-                })
-            })
-                .then(res => {
-                    if (!res.ok) throw new Error("Invalid API key or Groq error");
-                    return res.json();
-                })
-                .then(data => {
-                    const response = data.choices[0].message.content;
-                    renderAIResponse(aiElement, response);
-                })
-                .catch(err => {
-                    console.error("Direct Groq API failure:", err);
-                    aiElement.classList.remove('loading-msg');
-                    aiElement.innerHTML = `
-                    <div style="color: #d9534f; font-weight: bold; margin-bottom: 5px;">❌ Direct AI Query Failed</div>
-                    Please click the ⚙️ gear settings icon and verify that your Groq API Key is entered correctly.
-                `;
-                    document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
-                });
-        }
-
-        function renderAIResponse(aiElement, text) {
-            aiElement.classList.remove('loading-msg');
-            // Format newlines as HTML breaks
-            aiElement.innerHTML = text.replace(/\n/g, '<br>');
-            document.getElementById('chat-box').scrollTop = document.getElementById('chat-box').scrollHeight;
+                responseBox.textContent = data.response || 'No response returned.';
+            } catch (error) {
+                responseBox.innerHTML = `<span style="color:red;">Network error.</span>`;
+            }
         }
     </script>
 </body>
-
 </html>

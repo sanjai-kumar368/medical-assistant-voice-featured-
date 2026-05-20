@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Patient Registration Form</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
-
 <body>
     <button class="back-btn" onclick="window.location.href='/'">← Back</button>
+
     <div class="app-container">
         <header class="app-header">
             <h1>📝 Patient Form</h1>
@@ -24,11 +23,27 @@
                         style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;"
                         placeholder="e.g. John Doe">
                 </div>
+
                 <div style="margin-bottom: 15px;">
                     <label>Age:</label>
                     <input type="number" id="patient-age-field"
                         style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;"
                         placeholder="e.g. 35">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label>Doctor Name:</label>
+                    <input type="text" id="doctor-name-field"
+                        style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;"
+                        placeholder="e.g. Dr. Rajesh"
+                        value="{{ doctor_name }}">
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <label>Appointment Time:</label>
+                    <input type="text" id="appointment-time-field"
+                        style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;"
+                        placeholder="e.g. 10 AM - 2 PM">
                 </div>
 
                 <div style="margin-bottom: 15px;">
@@ -42,19 +57,59 @@
                         <option value="Children's Health Center">Children's Health Center</option>
                     </select>
                 </div>
-                <button type="button" class="primary-btn"
-                    onclick="alert('Patient form submitted successfully!')">Register Patient</button>
+
+                <button type="submit" class="primary-btn">Register Patient</button>
             </form>
         </div>
 
-        <!-- Voice Control Section at the Page End -->
         <div class="voice-controls">
             <button id="voice-btn" class="voice-btn">🎤 Enable Voice Control</button>
-            <p id="voice-status" class="voice-status">Say: "My name is John", "Age is 35", "Symptoms are headache",
-                "Hospital City General"</p>
+            <p id="voice-status" class="voice-status">Say: "My name is John", "Age is 35", "Symptoms are headache", "Hospital City General"</p>
         </div>
     </div>
+
+    <script>
+        document.getElementById('patient-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const patientName = document.getElementById('patient-name-field').value.trim();
+            const doctorName = document.getElementById('doctor-name-field').value.trim();
+            const appointmentTime = document.getElementById('appointment-time-field').value.trim();
+
+            if (!patientName || !doctorName || !appointmentTime) {
+                alert('Please fill Patient Name, Doctor Name, and Appointment Time.');
+                return;
+            }
+
+            try {
+                const response = await fetch('/book', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        patient_name: patientName,
+                        doctor_name: doctorName,
+                        appointment_time: appointmentTime
+                    })
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    alert(result.error || 'Booking failed.');
+                    return;
+                }
+
+                alert(result.message || 'Appointment booked successfully!');
+                window.location.href = '/';
+            } catch (error) {
+                console.error(error);
+                alert('Network error while booking appointment.');
+            }
+        });
+    </script>
+
     <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
-
 </html>

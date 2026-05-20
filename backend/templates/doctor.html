@@ -1,25 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book a Doctor - Medical Assistant</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <!-- Supabase SDK and Credentials -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="{{ url_for('static', filename='supabase-config.js') }}"></script>
 </head>
-
 <body>
     <div class="app-container">
         <button class="back-btn" onclick="window.location.href='/'">← Back</button>
+
         <header class="app-header">
             <h1>🩺 Book a Doctor</h1>
             <p class="subtitle">Enter your symptoms to find the right specialist</p>
         </header>
 
-        <!-- Symptom Checker Section -->
         <div class="card" style="margin: 0 auto 30px auto; max-width: 500px; text-align: left;">
             <h2>What are your symptoms?</h2>
             <input type="text" id="symptom-input" placeholder="e.g. chest pain, headache, skin rash"
@@ -27,20 +24,17 @@
             <button class="primary-btn" onclick="findDoctors()">Find Doctors</button>
         </div>
 
-        <!-- Recommended Doctors -->
         <div id="recommended-doctors" style="display: none; width: 100%; max-width: 500px; margin: 0 auto 30px auto;">
             <h3 style="margin-bottom: 15px;">Recommended Specialists</h3>
             <div id="doctors-container" style="display: flex; flex-direction: column; gap: 15px;"></div>
         </div>
 
-        <!-- Voice Control Section at the Page End -->
         <div class="voice-controls">
             <button id="voice-btn" class="voice-btn">🎤 Enable Voice Control</button>
             <p id="voice-status" class="voice-status">Say "My name is John", "Select Doctor Sarah", "On Monday"</p>
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='supabase-config.js') }}"></script>
     <script>
         const staticDoctors = [
             { name: "Dr. Alice Smith", specialty: "Cardiologist", hospital: "City General Hospital", keywords: ["chest pain", "heart", "blood pressure"] },
@@ -70,30 +64,28 @@
             "Gynecologist": ["pregnancy", "women", "period"]
         };
 
-        // Query to fetch doctors from Supabase
         async function loadDoctors() {
-            if (!supabaseClient) {
-                console.warn("Supabase client not initialized, using static fallback.");
+            if (!window.supabaseClient) {
                 doctorsData = staticDoctors;
                 return;
             }
+
             const { data, error } = await supabaseClient.from('doctors').select('*');
+
             if (error) {
                 console.error("Error loading doctors from Supabase:", error);
                 doctorsData = staticDoctors;
-            } else if (data && data.length > 0) {
-                const dbDoctors = data.map(doc => ({
-                    name: doc.name,
-                    specialty: doc.specialist,
-                    hospital: doc.hospital,
-                    keywords: keywordsMap[doc.specialist] || ["general", "consult"]
-                }));
-                // Seamlessly combine Supabase custom doctors + premium fallback doctors!
-                doctorsData = [...staticDoctors, ...dbDoctors];
-                console.log("Loaded doctors from Supabase successfully!");
-            } else {
-                doctorsData = staticDoctors;
+                return;
             }
+
+            const dbDoctors = (data || []).map(doc => ({
+                name: doc.name,
+                specialty: doc.specialist,
+                hospital: doc.hospital,
+                keywords: keywordsMap[doc.specialist] || ["general", "consult"]
+            }));
+
+            doctorsData = [...staticDoctors, ...dbDoctors];
         }
 
         window.addEventListener('DOMContentLoaded', loadDoctors);
@@ -114,8 +106,8 @@
 
             for (let doc of doctorsData) {
                 for (let keyword of doc.keywords) {
-                    if (input.includes(keyword)) {
-                        if (!matches.includes(doc)) matches.push(doc);
+                    if (input.includes(keyword) && !matches.includes(doc)) {
+                        matches.push(doc);
                     }
                 }
             }
@@ -131,7 +123,7 @@
                         <h2 style="font-size: 1.2em;">${doc.name}</h2>
                         <p style="margin-bottom: 5px;"><strong>Specialty:</strong> ${doc.specialty}</p>
                         <p style="margin-bottom: 15px;"><strong>Hospital:</strong> ${doc.hospital}</p>
-                        <button class="primary-btn" onclick="selectDoctor('${doc.name}')" style="font-size: 0.9em; padding: 8px;">Select Doctor</button>
+                        <button class="primary-btn" onclick="selectDoctor('${doc.name}', '${doc.hospital}')" style="font-size: 0.9em; padding: 8px;">Select Doctor</button>
                     </div>
                 `;
             });
@@ -139,11 +131,10 @@
             section.style.display = 'block';
         }
 
-        function selectDoctor(docName) {
+        function selectDoctor(docName, hospitalName) {
             alert('You have selected ' + docName + '. Please use the Patient Form to book an appointment.');
-            window.location.href = '/patient-form';
+            window.location.href = '/patient-form?doctor_name=' + encodeURIComponent(docName);
         }
     </script>
 </body>
-
 </html>
