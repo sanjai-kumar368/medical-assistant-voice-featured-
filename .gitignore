@@ -1,0 +1,29 @@
+# Credentials and Secrets
+.env
+backend/.env
+frontend/supabase-config.js.bak
+
+# Databases
+*.db
+backend/medical.db
+
+# Python
+__pycache__/
+backend/__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Editor and System settings
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

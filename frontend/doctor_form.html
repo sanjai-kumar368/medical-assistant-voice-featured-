@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Doctor Registration Form</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Supabase JS Client Library SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+    <!-- Supabase Configuration and Initialization -->
+    <script src="supabase-config.js"></script>
+</head>
+<body>
+    <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+    <div class="app-container">
+        <header class="app-header">
+            <h1>👨‍⚕️ Add Doctor</h1>
+            <p class="subtitle">Register a new medical professional to Supabase</p>
+        </header>
+
+        <div class="card" style="max-width: 500px; margin: 0 auto; text-align: left;">
+            <form id="doctor-form">
+                <div style="margin-bottom: 15px;">
+                    <label>Doctor Name:</label>
+                    <input type="text" id="doc-name" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;" placeholder="e.g. Dr. Sarah Jenkins">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Specialist:</label>
+                    <input type="text" id="doc-specialist" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;" placeholder="e.g. Cardiologist">
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <label>Working Hospital:</label>
+                    <input type="text" id="doc-hospital" style="width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 4px;" placeholder="e.g. City General Hospital">
+                </div>
+                
+                <button type="button" class="primary-btn" onclick="handleRegister()">Add Doctor Profile</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        async function handleRegister() {
+            const name = document.getElementById('doc-name').value;
+            const specialist = document.getElementById('doc-specialist').value;
+            const hospital = document.getElementById('doc-hospital').value;
+            
+            if (!name || !specialist || !hospital) {
+                alert("Please fill all required registration fields.");
+                return;
+            }
+
+            if (!supabaseClient) {
+                alert("Supabase Client not initialized. Please set up your credentials in frontend/supabase-config.js.");
+                return;
+            }
+
+            // Supabase Query: Insert doctor details into the 'doctors' table
+            const { data, error } = await supabaseClient
+                .from('doctors')
+                .insert([
+                    { 
+                        name: name, 
+                        specialist: specialist, 
+                        hospital: hospital
+                    }
+                ]);
+
+            if (error) {
+                alert("Registration failed in Supabase: " + error.message);
+                console.error("Supabase insert error:", error);
+            } else {
+                alert(`Doctor ${name} registered successfully in the Supabase database!`);
+                document.getElementById('doctor-form').reset();
+            }
+        }
+    </script>
+</body>
+</html>

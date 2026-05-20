@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medical Assistant</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <button class="login-btn" onclick="window.location.href='doctor_login.html'">🔑 Doctor Login</button>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="logo">⚕️</div>
+            <h1>Medical Assistant</h1>
+            <p class="subtitle">Your personal AI healthcare companion</p>
+
+        </header>
+
+        <main class="action-grid">
+            <div class="card" onclick="window.location.href='chatbot.html'">
+                <div class="card-icon prescription-icon">💊</div>
+                <h2>Get Prescription</h2>
+                <p>Request a new prescription or manage your existing medication securely and instantly.</p>
+                <button class="primary-btn">Start Now</button>
+            </div>
+
+            <div class="card" onclick="window.location.href='doctor.html'">
+                <div class="card-icon doctor-icon">🩺</div>
+                <h2>Book Doctors</h2>
+                <p>Find specialized medical professionals and schedule your appointments with ease.</p>
+                <button class="primary-btn">Book Visit</button>
+            </div>
+        </main>
+
+        <!-- Voice Control Section at the Page End -->
+        <div class="voice-controls">
+            <button id="voice-btn" class="voice-btn">🎤 Enable Voice Control</button>
+            <p id="voice-status" class="voice-status">Click to start listening...</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

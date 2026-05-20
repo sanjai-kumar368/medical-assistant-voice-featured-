@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book a Doctor - Medical Assistant</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- Supabase SDK and Credentials -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+</head>
+
+<body>
+    <div class="app-container">
+        <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+        <header class="app-header">
+            <h1>🩺 Book a Doctor</h1>
+            <p class="subtitle">Enter your symptoms to find the right specialist</p>
+        </header>
+
+        <!-- Symptom Checker Section -->
+        <div class="card" style="margin: 0 auto 30px auto; max-width: 500px; text-align: left;">
+            <h2>What are your symptoms?</h2>
+            <input type="text" id="symptom-input" placeholder="e.g. chest pain, headache, skin rash"
+                style="width: 100%; padding: 10px; margin-top: 10px; margin-bottom: 15px; border: 1px solid #ccc; border-radius: 4px;">
+            <button class="primary-btn" onclick="findDoctors()">Find Doctors</button>
+        </div>
+
+        <!-- Recommended Doctors -->
+        <div id="recommended-doctors" style="display: none; width: 100%; max-width: 500px; margin: 0 auto 30px auto;">
+            <h3 style="margin-bottom: 15px;">Recommended Specialists</h3>
+            <div id="doctors-container" style="display: flex; flex-direction: column; gap: 15px;"></div>
+        </div>
+
+        <!-- Voice Control Section at the Page End -->
+        <div class="voice-controls">
+            <button id="voice-btn" class="voice-btn">🎤 Enable Voice Control</button>
+            <p id="voice-status" class="voice-status">Say "My name is John", "Select Doctor Sarah", "On Monday"</p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        const staticDoctors = [
+            { name: "Dr. Alice Smith", specialty: "Cardiologist", hospital: "City General Hospital", keywords: ["chest pain", "heart", "blood pressure"] },
+            { name: "Dr. Bob Johnson", specialty: "Dermatologist", hospital: "Westside Clinic", keywords: ["skin", "rash", "itching", "acne"] },
+            { name: "Dr. Charlie Brown", specialty: "Pediatrician", hospital: "Children's Health Center", keywords: ["child", "baby", "fever"] },
+            { name: "Dr. Diana Prince", specialty: "Neurologist", hospital: "Metro Medical Center", keywords: ["headache", "dizzy", "migraine", "nerve"] },
+            { name: "Dr. Evan Wright", specialty: "Orthopedic", hospital: "City General Hospital", keywords: ["bone", "joint", "muscle", "pain"] },
+            { name: "Dr. Fiona Gallagher", specialty: "Oncologist", hospital: "Hope Cancer Institute", keywords: ["cancer", "tumor"] },
+            { name: "Dr. George Martin", specialty: "Psychiatrist", hospital: "Mind Wellness Clinic", keywords: ["mental", "anxiety", "depression", "stress"] },
+            { name: "Dr. Hannah Abbott", specialty: "General Physician", hospital: "Community Care", keywords: ["fever", "cold", "cough", "flu", "stomach", "sick"] },
+            { name: "Dr. Ian Malcolm", specialty: "Surgeon", hospital: "Metro Medical Center", keywords: ["surgery", "operation"] },
+            { name: "Dr. Jessica Jones", specialty: "Gynecologist", hospital: "Women's Health Hospital", keywords: ["pregnancy", "women", "period"] }
+        ];
+
+        let doctorsData = [];
+
+        const keywordsMap = {
+            "Cardiologist": ["chest pain", "heart", "blood pressure"],
+            "Dermatologist": ["skin", "rash", "itching", "acne"],
+            "Pediatrician": ["child", "baby", "fever"],
+            "Neurologist": ["headache", "dizzy", "migraine", "nerve"],
+            "Orthopedic": ["bone", "joint", "muscle", "pain"],
+            "Oncologist": ["cancer", "tumor"],
+            "Psychiatrist": ["mental", "anxiety", "depression", "stress"],
+            "General Physician": ["fever", "cold", "cough", "flu", "stomach", "sick"],
+            "Surgeon": ["surgery", "operation"],
+            "Gynecologist": ["pregnancy", "women", "period"]
+        };
+
+        // Query to fetch doctors from Supabase
+        async function loadDoctors() {
+            if (!supabaseClient) {
+                console.warn("Supabase client not initialized, using static fallback.");
+                doctorsData = staticDoctors;
+                return;
+            }
+            const { data, error } = await supabaseClient.from('doctors').select('*');
+            if (error) {
+                console.error("Error loading doctors from Supabase:", error);
+                doctorsData = staticDoctors;
+            } else if (data && data.length > 0) {
+                const dbDoctors = data.map(doc => ({
+                    name: doc.name,
+                    specialty: doc.specialist,
+                    hospital: doc.hospital,
+                    keywords: keywordsMap[doc.specialist] || ["general", "consult"]
+                }));
+                // Seamlessly combine Supabase custom doctors + premium fallback doctors!
+                doctorsData = [...staticDoctors, ...dbDoctors];
+                console.log("Loaded doctors from Supabase successfully!");
+            } else {
+                doctorsData = staticDoctors;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', loadDoctors);
+
+        function findDoctors() {
+            const input = document.getElementById('symptom-input').value.toLowerCase();
+            const container = document.getElementById('doctors-container');
+            const section = document.getElementById('recommended-doctors');
+
+            container.innerHTML = '';
+
+            if (!input) {
+                alert("Please enter your symptoms to find a doctor.");
+                return;
+            }
+
+            let matches = [];
+
+            for (let doc of doctorsData) {
+                for (let keyword of doc.keywords) {
+                    if (input.includes(keyword)) {
+                        if (!matches.includes(doc)) matches.push(doc);
+                    }
+                }
+            }
+
+            if (matches.length === 0) {
+                matches = doctorsData.filter(d => d.specialty === "General Physician");
+                alert("Couldn't find a direct match for those symptoms, recommending a General Physician.");
+            }
+
+            matches.forEach(doc => {
+                container.innerHTML += `
+                    <div class="card doctor-card" style="width: 100%; box-sizing: border-box;">
+                        <h2 style="font-size: 1.2em;">${doc.name}</h2>
+                        <p style="margin-bottom: 5px;"><strong>Specialty:</strong> ${doc.specialty}</p>
+                        <p style="margin-bottom: 15px;"><strong>Hospital:</strong> ${doc.hospital}</p>
+                        <button class="primary-btn" onclick="selectDoctor('${doc.name}')" style="font-size: 0.9em; padding: 8px;">Select Doctor</button>
+                    </div>
+                `;
+            });
+
+            section.style.display = 'block';
+        }
+
+        function selectDoctor(docName) {
+            alert('You have selected ' + docName + '. Please use the Patient Form to book an appointment.');
+            window.location.href = 'patient_form.html';
+        }
+    </script>
+</body>
+
+</html>
