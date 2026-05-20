@@ -156,8 +156,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (recognition) {
 
-        startRecognition();
-
         recognition.onstart = () => {
 
             isListening = true;

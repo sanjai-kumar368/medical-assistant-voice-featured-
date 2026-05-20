@@ -5,6 +5,7 @@ from flask import Flask, jsonify, request, render_template
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest
+from groq import Groq
 
 load_dotenv()
 
@@ -16,6 +17,13 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+# ---------------- GROQ CLIENT ----------------
+
+client = Groq(
+    api_key=os.getenv("GROQ_API_KEY")
+)
+
+# ---------------- DATABASE MODELS ----------------
 
 class Doctor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -45,6 +53,7 @@ def add_doctors():
     db.session.add_all(doctors_list)
     db.session.commit()
 
+# ---------------- ROUTES ----------------
 
 @app.route('/')
 def home():
@@ -76,10 +85,12 @@ def doctor_form():
 def doctor_login():
     return render_template('doctor_login.html')
 
+# ---------------- DOCTORS ----------------
 
 @app.route('/doctors', methods=['GET'])
 def doctors():
     all_doctors = Doctor.query.all()
+
     doctors_list = [
         {
             "id": doctor.id,
@@ -89,12 +100,16 @@ def doctors():
         }
         for doctor in all_doctors
     ]
+
     return jsonify(doctors_list)
 
+# ---------------- BOOK APPOINTMENT ----------------
 
 @app.route('/book', methods=['POST'])
 def book_appointment():
+
     data = request.get_json(silent=True)
+
     if not data:
         raise BadRequest("Request body must be valid JSON.")
 
@@ -103,6 +118,7 @@ def book_appointment():
     appointment_time = data.get('appointment_time', '').strip()
 
     if not patient_name or not doctor_name or not appointment_time:
+
         return jsonify({
             "error": "patient_name, doctor_name, and appointment_time are required."
         }), 400
@@ -120,47 +136,98 @@ def book_appointment():
         "message": "Appointment booked successfully"
     }), 201
 
+# ---------------- VOICE COMMAND ----------------
 
 @app.route('/voice-command', methods=['POST'])
 def voice_command():
+
     data = request.get_json(silent=True)
+
     if not data:
         raise BadRequest("Request body must be valid JSON.")
 
     text = data.get('text', '').strip()
+
     if not text:
-        return jsonify({"error": "text is required"}), 400
+        return jsonify({
+            "error": "text is required"
+        }), 400
 
     return jsonify({
         "spoken_text": text,
         "intent": "processed"
     })
 
+# ---------------- AI MEDICAL CHATBOT ----------------
 
 @app.route('/ai-medical', methods=['POST'])
 def ai_medical():
+
     data = request.get_json(silent=True)
+
     if not data:
         raise BadRequest("Request body must be valid JSON.")
 
     query = data.get('query', '').strip()
+
     if not query:
-        return jsonify({"error": "query is required"}), 400
+        return jsonify({
+            "error": "query is required"
+        }), 400
 
-    return jsonify({
-        "response": f"You asked: {query}"
-    })
+    try:
 
+        completion = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are a helpful AI medical assistant. "
+                        "Provide safe health guidance but avoid diagnosis."
+                    )
+                },
+                {
+                    "role": "user",
+                    "content": query
+                }
+            ]
+        )
+
+        ai_response = (
+            completion
+            .choices[0]
+            .message
+            .content
+        )
+
+        return jsonify({
+            "response": ai_response
+        })
+
+    except Exception as e:
+
+        print("Groq Error:", e)
+
+        return jsonify({
+            "error": str(e)
+        }), 500
+
+# ---------------- ERROR HANDLER ----------------
 
 @app.errorhandler(BadRequest)
 def handle_bad_request(e):
-    return jsonify({"error": str(e.description)}), 400
+    return jsonify({
+        "error": str(e.description)
+    }), 400
 
+# ---------------- INIT DATABASE ----------------
 
 with app.app_context():
     db.create_all()
     add_doctors()
 
+# ---------------- RUN APP ----------------
 
 if __name__ == '__main__':
     app.run(debug=True)
