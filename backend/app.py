@@ -76,6 +76,10 @@ def home():
 def doctor_page():
     return render_template('doctor.html')
 
+@app.route('/patient-form')
+def patient_form():
+    return render_template('patient_form.html')
+
 @app.route('/chatbot')
 def chatbot_page():
     return render_template('chatbot.html')
